@@ -206,6 +206,28 @@ prompt is switched to tell the model it has no internet rather than offering it
 tools that cannot work. Promising a model tools it does not have is how you get a
 confidently invented search result.
 
+## Model licences
+
+The weights are **not** committed to this repository. `get_models.ps1` fetches
+them, and the `MODEL_CARD` file for each Piper voice is tracked alongside where
+they land so the licence travels with the project.
+
+| Model | Licence | Matters because |
+| --- | --- | --- |
+| `en_US-ryan-medium` | CC BY-NC-SA 4.0 | **non-commercial** |
+| `hi_IN-pratham-medium` | CC BY-NC-SA 4.0 | **non-commercial** |
+| `ml_IN-arjun-medium` | see its MODEL_CARD | check before shipping |
+| espeak-ng | GPLv3 | separate binary, invoked not linked |
+| Whisper (faster-whisper) | MIT | permissive |
+| `qwen2.5` | Apache 2.0 | permissive |
+| `nomic-embed-text` | Apache 2.0 | permissive |
+
+The three Piper voices are the only non-commercial component. If this is ever
+deployed as a commercial or paid service, they have to go — set
+`TTS_LOCAL_ENGINE=espeak` and every language falls back to espeak-ng, which is
+GPLv3 and has no such restriction. The quality drops for English, Hindi and
+Malayalam; nothing else changes.
+
 ## Testing
 
 ```powershell

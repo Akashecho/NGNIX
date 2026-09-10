@@ -15,7 +15,10 @@ __pycache__/
 corpus.index.json
 corpus.local.json
 
-ngnix-astra-brain-engine/models/
+ngnix-astra-brain-engine/models/*
+!ngnix-astra-brain-engine/models/piper/
+ngnix-astra-brain-engine/models/piper/*
+!ngnix-astra-brain-engine/models/piper/*.MODEL_CARD
 local/models/
 ngnix-astra-brain-engine/voice-samples/
 

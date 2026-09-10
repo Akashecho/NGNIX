@@ -26,9 +26,9 @@ prod = Path(os.getenv('TEMP', '.')) / 'tars_production_token.txt'
 if prod.is_file():
     secrets['BRAIN_SESSION_TOKEN_PRODUCTION'] = prod.read_text(encoding='utf-8').strip()
 
-staged = subprocess.run(['git', 'diff', '--cached', '--name-only'],
+staged = subprocess.run(['git', 'ls-files'],
                         capture_output=True, text=True, cwd=ROOT).stdout.split()
-print(f'{len(staged)} staged files, {len(secrets)} live secrets to look for')
+print(f'{len(staged)} tracked files, {len(secrets)} live secrets to look for')
 
 if not secrets:
     print('No live secrets found to check against. Is ngnix-astra-brain-engine/.env present?')
