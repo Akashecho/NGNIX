@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f0e9dd">
+  <meta name="description" content="Astra — a voice-first TARS studio for cooperative communities. Interactive prototype.">
+  <title>Astra · TARS Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.mjs"></script>
+</head>
+<body>
+  <section id="ritual" class="screen ritual" aria-labelledby="ritual-title">
+    <div class="eyebrow">ROOTED IN COMMUNITY. SHAPED BY INTELLIGENCE.</div>
+    <h1 id="ritual-title" class="wordmark">ASTRA</h1>
+    <p class="ritual-tagline">Intelligence takes shape.</p>
+    <button id="begin" class="lotus-button" aria-label="Begin: choose your language"><span data-lotus="240" data-seed="88" data-breathe></span></button>
+    <p class="tap-hint"><span class="dot"></span> tap the lotus to begin</p>
+    <div class="ritual-footer"><span>MEET TARS</span><p>A little wisdom. A familiar voice.<br>A helping hand, in your language.</p><small>SIH PS–88 · Ministry of Cooperation concept demo</small></div>
+  </section>
+
+  <section id="languages" class="screen language-screen" hidden aria-labelledby="language-title">
+    <span data-lotus="64" data-seed="88"></span>
+    <div class="eyebrow">A CONVERSATION STARTS WITH YOU</div>
+    <h1 id="language-title" tabindex="-1">Choose your <em>voice.</em></h1>
+    <p class="muted">Ten living languages of Bhārat. One place to feel heard.</p>
+    <div id="language-grid" class="language-grid" role="group" aria-label="Choose a language"></div>
+    <div class="greeting-card" aria-live="polite"><span class="eyebrow">A LITTLE HELLO</span><p id="greeting-preview"></p><small id="language-preview"></small></div>
+    <div class="language-actions"><button id="back" class="text-button">← Lotus</button><button id="enter" class="primary">Enter Studio →</button></div>
+    <p class="fine-print">Language selection and greetings are live. Full translation and cloud speech are not connected in this demo.</p>
+  </section>
+
+  <section id="studio" class="screen studio" hidden aria-label="TARS conversation studio">
+    <header class="studio-header">
+      <a href="#" id="home" class="brand" aria-label="Astra home"><span data-lotus="38" data-seed="88" data-breathe></span><span><strong>ASTRA</strong><small><span class="dot green"></span> <span id="active-language"></span></small></span></a>
+      <nav aria-label="Studio controls"><button id="face-open-header" class="icon-button" aria-label="Open TARS face mode" title="TARS face">▰▰</button><button id="new-chat-header" class="icon-button mobile-only" aria-label="New conversation" title="New conversation">＋</button><button id="change-language" class="badge" aria-label="Change language">अ / A</button><button id="sound" class="icon-button" aria-label="Mute interface sounds" aria-pressed="true">🔔</button><button id="theme" class="icon-button" aria-label="Switch to dark theme" aria-pressed="false">◐</button><button id="settings-open" class="icon-button" aria-label="Open voice and robot settings">⚙</button></nav>
+    </header>
+    <div class="studio-layout">
+      <aside class="sidebar">
+        <div class="eyebrow">YOUR COMMUNITY COMPANION</div><h2>Big questions.<br><em>Human answers.</em></h2><p>From the cooperative desk to the field. TARS helps make the next step feel simpler.</p>
+        <button id="new-chat" class="new-chat">＋ New conversation</button>
+        <div class="side-section"><span class="eyebrow">THIS STUDIO</span><div class="side-item"><span>◉</span> Conversation <span id="mode-pill" class="pill">DEMO</span></div><button id="voice-open" class="side-item">♫ Voice & listening <span>↗</span></button><button id="robot-open" class="side-item">⌘ Robot connection <span>↗</span></button></div>
+        <button id="face-open" class="robot-card" aria-label="Open TARS face mode"><canvas id="tars-face" class="robot-face" width="132" height="76" role="img" aria-label="TARS is idle" data-state="IDLE"></canvas><div><strong>A mind, with or without a body.</strong><p>Tap to see TARS full size and talk hands-free.</p><span class="connection"><span class="dot"></span> NOT PAIRED</span></div></button>
+        <p class="sidebar-note">Built for people, not paperwork.<br><span>ASTRA / TARS · PROTOTYPE 01</span></p>
+      </aside>
+      <main class="chat-panel">
+        <div class="chat-topline"><span>THE CONVERSATION STUDIO</span><span id="live-status" class="live-status" data-tone="pending" role="status"><span class="dot clay"></span> <span id="live-status-text">Connecting to the local model…</span></span></div>
+        <div id="chat-scroll" class="chat-scroll">
+          <div id="empty" class="empty-state"><span data-lotus="96" data-seed="88" data-breathe></span><div class="eyebrow">I’M TARS. YOUR COOPERATIVE COMPANION.</div><h1 id="studio-greeting" tabindex="-1"></h1><p>A familiar voice for the things that matter.<br>Ask a question. Let’s find your next step.</p><div id="suggestions" class="suggestions"></div><small class="empty-note">No question is too small. Not even “what is a PACS?”</small></div>
+          <div id="messages" class="messages" role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions"></div>
+          <div id="thinking" class="thinking" role="status" hidden><span data-lotus="28" data-seed="88" data-breathe></span><span id="thinking-label">Shaping an answer…</span></div>
+        </div>
+        <div class="composer-area"><div class="session-strip"><span><span class="dot green"></span> This browser tab only</span><button id="export" class="text-button">Export conversation ↗</button></div><form id="composer" class="composer"><label for="prompt" class="sr-only">Your question</label><textarea id="prompt" rows="1" maxlength="2000" placeholder="Ask TARS anything…"></textarea><button id="mic" type="button" class="mic-button" aria-pressed="false" aria-label="Speak to TARS" title="Click, speak, then pause">♩</button><button id="send" class="send-button" aria-label="Send message" disabled>↑</button></form><p class="disclaimer">Illustrative answers, not verified legal or financial advice. Microphone audio is streamed to the speech service only while you are listening.</p></div>
+      </main>
+    </div>
+  </section>
+
+  <section id="face-mode" class="screen face-mode" hidden aria-labelledby="face-mode-title">
+    <div class="face-stage">
+      <button id="face-tap" class="face-tap" aria-label="Tap TARS to talk">
+        <canvas id="tars-face-big" class="face-big" width="640" height="360" role="img" aria-label="TARS is idle" data-state="IDLE"></canvas>
+      </button>
+    </div>
+    <div class="face-console">
+      <h1 id="face-mode-title" class="sr-only">TARS face mode</h1>
+      <p id="face-state" class="face-state" role="status">Connecting…</p>
+      <p id="face-heard" class="face-heard" aria-live="polite"></p>
+      <p id="face-said" class="face-said" aria-live="polite"></p>
+      <div class="face-actions">
+        <button id="face-listen" class="primary">Tap to talk</button>
+        <button id="face-handsfree" class="badge" aria-pressed="false">Hands-free: off</button>
+        <button id="face-back" class="text-button">← Conversation</button>
+      </div>
+      <p class="face-hint">Tap TARS, or turn on hands-free and just say “<span id="face-wake">hey tars</span>”.</p>
+    </div>
+  </section>
+
+  <dialog id="settings" aria-labelledby="settings-title">
+    <div class="dialog-heading"><div><div class="eyebrow">THE VOICE WORKSHOP</div><h2 id="settings-title">A little more <em>human.</em></h2></div><button id="settings-close" class="icon-button" aria-label="Close settings">×</button></div>
+    <section class="setting-section"><h3>The model behind the answers</h3><div class="provider-grid"><div><span class="pill">LIVE</span><strong>Azure OpenAI</strong><small>gpt-4.1-nano generates the answers</small></div><div><span class="pill">LIVE</span><strong>Deepgram nova-3</strong><small>Streaming speech-to-text</small></div><div><span class="pill">LIVE</span><strong>Azure Speech</strong><small>Neural voice, and STT for Malayalam &amp; Odia</small></div></div><p class="muted">Azure OpenAI hosts the reasoning model. TARS adds the session state, persona, retrieval, tool routing and streaming around it. Speech in arrives through Deepgram nova-3, with Azure Speech covering the languages nova-3 does not support and standing in if Deepgram is unavailable; replies are spoken by Azure Speech neural TTS and streamed back as audio.</p><p id="pipeline-summary" class="fine-print" role="status">Connecting…</p><label class="switch-row">Speak replies aloud <input id="speak-replies" type="checkbox" checked></label><div class="test-actions"><button id="reconnect" class="primary">Reconnect to model</button></div><small class="fine-print">Connection status is shown above the conversation. If it reads offline, start the backend and check the keys in .env, then reconnect.</small></section>
+    <section class="setting-section"><h3>Listening in a busy room</h3><p class="muted">Speech is gated before it leaves your device. When you start the microphone, TARS measures the room for about a second, then sends only audio clearly above that noise floor — so a fan, a TV or a conversation nearby is not transcribed and cannot cut a reply short. The meter below moves with everything the microphone hears; only the part above the threshold is sent.</p><label class="switch-row">Request noise suppression <input id="noise" type="checkbox" checked></label><label class="switch-row">Request echo cancellation <input id="echo" type="checkbox" checked></label><label class="switch-row">Request automatic gain control <input id="gain" type="checkbox" checked></label><label class="switch-row">Mute the microphone while TARS speaks <input id="half-duplex" type="checkbox" checked></label><p class="fine-print">Leave that on unless you want to interrupt TARS mid-sentence. With it off, TARS can hear itself through your speakers and stop early — use headphones in that case.</p><label class="switch-row">Hands-free — wait for “<span id="wake-phrase">hey tars</span>” <input id="hands-free" type="checkbox"></label><p class="fine-print">With this on the microphone stays open and TARS only answers when you address it by name: “hey TARS, what is a PACS?”. Anything else you say is heard, ignored and never sent to the model. Turn it off for click-to-talk.</p><div class="meter" role="meter" aria-label="Microphone input level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="meter-fill"></span></div><p id="mic-status" class="fine-print" role="status">Microphone off. Permission is requested only when you start.</p><div class="test-actions"><button id="recalibrate" class="primary">Re-measure the room</button><button id="mic-test" class="text-button">Start 20-second mic test</button><button id="download-audio" class="text-button" disabled>Save local sample ↓</button></div><small class="fine-print">Audio stays in memory until you save it; discarded when you close this panel. HTTPS or localhost is required.</small></section>
+    <section class="setting-section"><h3>Personality, with good judgement</h3><label for="humor" class="switch-row">Warmth & dry wit <output id="humor-value">25%</output></label><input id="humor" type="range" min="0" max="100" value="25"><p class="muted">A little TARS-inspired wit in the welcome demo. Never at someone’s expense; serious support stays serious.</p><label class="switch-row">Device-voice filler preview (English) <input id="filler" type="checkbox"></label><p class="fine-print">Optional browser voice, not Azure. One short neutral filler per reply; no overlapping speech or repeated jokes.</p></section>
+  </dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>

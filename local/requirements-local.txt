@@ -1,0 +1,34 @@
+# Local edition: everything the offline speech engines need, on top of
+# ngnix-astra-brain-engine/requirements.txt.
+#
+#   pip install -r ngnix-astra-brain-engine/requirements.txt
+#   pip install -r local/requirements-local.txt
+#
+# All of these have prebuilt wheels for CPython 3.14 on Windows and for
+# aarch64 on Raspberry Pi OS (64-bit), so nothing compiles from source.
+
+# Offline speech recognition. Pulls in ctranslate2, tokenizers and huggingface-hub.
+# Models download once to ~/.cache/huggingface and are then used offline.
+faster-whisper>=1.1,<2
+
+# Offline neural speech synthesis (VITS via onnxruntime). Ships the espeak-ng
+# phonemiser data as a wheel, so Piper itself needs no system package.
+piper-tts>=1.2,<2
+
+# Pinned because piper-tts and faster-whisper both depend on it and a mismatch
+# between their preferred versions is the usual cause of a load failure on a Pi.
+onnxruntime>=1.17,<2
+
+indic-nlp-library>=0.92,<1
+indic-num2words>=1.3,<2
+
+# NOTE: espeak-ng is a *system* package, not a pip package. It provides the only
+# local voice for Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada, Punjabi
+# and Odia, and it is the fallback whenever a Piper model is missing.
+#
+#   Raspberry Pi OS / Debian / Ubuntu:  sudo apt install -y espeak-ng
+#   Windows:                            winget install eSpeak-NG.eSpeak-NG
+#                                       (then reopen the shell so PATH updates)
+#   macOS:                              brew install espeak-ng
+#
+# Without it the edition still speaks English, Hindi and Malayalam through Piper.

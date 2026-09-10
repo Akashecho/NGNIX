@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TARS face — preview</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body{padding:28px 32px;max-width:1080px;margin:0 auto}
+    h1{font-family:Fraunces,Georgia,serif;font-weight:400;margin:0 0 4px}
+    .lead{color:var(--ink-soft);margin:0 0 24px;max-width:62ch}
+    .controls{display:flex;gap:20px;align-items:center;flex-wrap:wrap;padding:14px 18px;margin-bottom:26px;
+      background:var(--card);border:1px solid var(--line);border-radius:18px}
+    .controls label{display:flex;gap:8px;align-items:center;font-size:13px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+    .cell{padding:16px;background:var(--card);border:1px solid var(--line);border-radius:18px;text-align:center}
+    .cell h3{margin:0 0 4px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+    .cell small{display:block;color:var(--ink-soft);margin-bottom:12px;font-size:11px;min-height:2.4em}
+    .cell canvas{--face-ink:var(--ink-soft);--face-glow:var(--clay);--face-dim:var(--line);
+      border:1px solid var(--sand);border-radius:10px;display:block;margin:0 auto}
+    .sizes{display:flex;gap:26px;align-items:flex-end;justify-content:center;padding:22px;
+      background:var(--card);border:1px solid var(--line);border-radius:18px;margin-top:26px;flex-wrap:wrap}
+    .sizes figure{margin:0;text-align:center}
+    .sizes figcaption{font-size:11px;color:var(--ink-soft);margin-top:8px}
+    .sizes canvas{--face-ink:var(--ink-soft);--face-glow:var(--clay);--face-dim:var(--line);
+      border:1px solid var(--sand);border-radius:10px}
+  </style>
+</head>
+<body>
+  <h1>TARS face — preview</h1>
+  <p class="lead">Two designs, the same state machine. <strong>Panels</strong> is film-accurate: TARS is a slab
+  with a bar display, no eyes. <strong>Eyes</strong> reads as a face to most people. Pick one, or say
+  "bigger" and I'll add a hero version to the chat screen.</p>
+
+  <div class="controls">
+    <label>Design
+      <select id="variant"><option value="panels">panels (film-accurate)</option><option value="eyes">eyes (warmer)</option></select>
+    </label>
+    <label>Simulated voice level <input id="level" type="range" min="0" max="100" value="0"></label>
+    <label><input id="auto" type="checkbox" checked> animate the level</label>
+    <label><input id="dark" type="checkbox"> dark theme</label>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="sizes">
+    <figure><canvas id="s1" width="66" height="38" style="width:66px;height:38px"></canvas><figcaption>66×38 — current sidebar</figcaption></figure>
+    <figure><canvas id="s2" width="120" height="70" style="width:120px;height:70px"></canvas><figcaption>120×70 — larger sidebar</figcaption></figure>
+    <figure><canvas id="s3" width="240" height="140" style="width:240px;height:140px"></canvas><figcaption>240×140 — hero on the chat screen</figcaption></figure>
+    <figure><canvas id="s4" width="420" height="240" style="width:420px;height:240px"></canvas><figcaption>420×240 — Pi display / kiosk</figcaption></figure>
+  </div>
+
+  <script type="module">
+    import {TarsFace} from './face.mjs';
+
+    const STATES = [
+      ['IDLE', 'connected, nothing happening — slow breathing and a blink'],
+      ['ARMED', 'hands-free: waiting for “hey TARS”'],
+      ['LISTENING', 'microphone open, bar follows your voice'],
+      ['THINKING', 'model is working — sweeping band'],
+      ['SPEAKING', 'bar follows the amplitude of TARS’s own voice'],
+      ['OFFLINE', 'backend not reachable'],
+    ];
+
+    const faces = [];
+    const grid = document.getElementById('grid');
+    for (const [state, note] of STATES) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.innerHTML = `<h3>${state}</h3><small>${note}</small>`;
+      const canvas = document.createElement('canvas');
+      canvas.width = 176; canvas.height = 100;
+      canvas.style.width = '176px'; canvas.style.height = '100px';
+      cell.append(canvas);
+      grid.append(cell);
+      const face = new TarsFace(canvas);
+      face.setState(state);
+      face.start();
+      faces.push({face, state});
+    }
+
+    for (const id of ['s1', 's2', 's3', 's4']) {
+      const face = new TarsFace(document.getElementById(id));
+      face.setState('SPEAKING');
+      face.start();
+      faces.push({face, state: 'SPEAKING'});
+    }
+
+    const variant = document.getElementById('variant');
+    variant.addEventListener('change', () => {
+      for (const entry of faces) entry.face.setVariant(variant.value);
+    });
+
+    const level = document.getElementById('level');
+    const auto = document.getElementById('auto');
+    function applyLevel(value) {
+      for (const entry of faces) {
+        // Only the states that actually carry a level should react.
+        const active = entry.state === 'LISTENING' || entry.state === 'SPEAKING';
+        entry.face.setLevel(active ? value : 0);
+      }
+    }
+    level.addEventListener('input', () => { auto.checked = false; applyLevel(level.value / 100); });
+    setInterval(() => {
+      if (!auto.checked) return;
+      // A speech-like envelope rather than a smooth sine, so the bar looks real.
+      const value = Math.max(0, Math.sin(Date.now() / 260) * 0.5 + 0.5) * (0.5 + Math.random() * 0.5);
+      level.value = String(Math.round(value * 100));
+      applyLevel(value);
+    }, 80);
+
+    document.getElementById('dark').addEventListener('change', event => {
+      document.documentElement.dataset.theme = event.target.checked ? 'dark' : 'light';
+    });
+  </script>
+</body>
+</html>

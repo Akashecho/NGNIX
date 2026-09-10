@@ -1,0 +1,9 @@
+{
+  "name": "ngnix-astra-studio-demo",
+  "private": true,
+  "type": "module",
+  "description": "TARS studio frontend. No build step: the browser loads these ES modules as they are. This file exists so Vercel serves api/config.js as ESM instead of transpiling it to CommonJS.",
+  "scripts": {
+    "test": "node client_test.mjs \"What is a PACS?\" && node voice_test.mjs && node face_test.mjs"
+  }
+}
