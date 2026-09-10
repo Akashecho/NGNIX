@@ -281,7 +281,9 @@ full, compact = character_block(dials), compact_character_block(dials)
 check('the local profile selects the compact persona',
       settings.effective_prompt_style == 'compact', settings.effective_prompt_style)
 check('persona_block honours the style', persona_block(dials, 'compact') == compact)
-check('the compact persona is far smaller', len(compact) < len(full) / 3,
+check('the compact persona fits its latency budget', len(compact) <= 2800,
+      f'{len(compact)} chars, about {len(compact) // 4} tokens')
+check('the compact persona is much smaller than the full one', len(compact) < len(full) / 2.5,
       f'{len(compact)} vs {len(full)} chars')
 # Everything below is what must survive the shrink.
 check('compact keeps the TARS identity', 'TARS' in compact and 'military-surplus' in compact)
@@ -291,7 +293,9 @@ check('compact keeps the drop-the-humour safety rule',
       'HARD RULE' in compact and 'worried' in compact and 'humour stops completely' in compact)
 check('compact keeps the wit off the user', 'never at the user' in compact)
 check('compact keeps the garbled-input rule', 'did not catch' in compact)
-check('compact still carries worked examples', compact.count('->') >= 4)
+check('compact still carries worked examples', compact.count('TARS:') >= 6)
+check('compact carries no negative examples for a small model to copy',
+      'WRONG' not in compact)
 check('an Azure profile would still get the full persona',
       Settings.load().__class__(**{**{f: getattr(settings, f) for f in settings.__dataclass_fields__},
                                    'llm_provider': 'azure', 'prompt_style': 'auto'}).effective_prompt_style == 'full')
