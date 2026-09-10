@@ -8,30 +8,33 @@ the same thing written for a person.
 
 ---
 
-## 1. What to copy, and what to leave behind
-
-Copy the whole project folder, then **delete one file**:
+## 1. Get the code
 
 ```powershell
-Remove-Item ngnix-astra-brain-engine\.env
+git clone https://github.com/Akashecho/NGNIX.git tars
+cd tars
 ```
 
-That file holds live Azure OpenAI, Azure Speech and Deepgram keys. The offline
-edition does not use them and must not carry them onto another laptop. Everything
-the offline edition needs is in `local\.env.local`, which contains no secrets.
+A clone deliberately does **not** include several things. All of them are
+regenerated or downloaded by the steps below, so this is expected, not a problem:
 
-Worth copying if it came along — it saves a download:
-
-| Path | Size | If missing |
+| Not in the clone | Why | Restored by |
 | --- | --- | --- |
-| `ngnix-astra-brain-engine\models\piper\` | ~180 MB | re-downloaded by `get_models.ps1` |
+| `ngnix-astra-brain-engine\.env` | holds live cloud keys | not needed; the offline edition uses `local\.env.local`, which **is** in the clone |
+| `models\piper\*.onnx` | 181 MB of weights, CC BY-NC-SA | `get_models.ps1` |
+| `corpus.local.json` | embeds the corpus, rebuilt per model | `run-local.ps1`, automatically |
+| Whisper model | lives in the user cache, not the repo | first use, or `get_models.ps1` |
+| Ollama models | Ollama's own store | `get_models.ps1` |
 
-Do **not** bother copying, they are rebuilt or re-fetched automatically:
+If instead you **copied the folder** from another machine rather than cloning,
+delete the cloud keys before doing anything else — they should not travel:
 
-- `corpus.local.json` and `corpus.index.json` — rebuilt on first run
-- `__pycache__`, `.venv` — machine-specific
-- `%USERPROFILE%\.cache\huggingface` — the Whisper model, re-downloaded (~470 MB
-  for `small`). Copy it if you want a fully offline first boot.
+```powershell
+Remove-Item ngnix-astra-brain-engine\.env -ErrorAction SilentlyContinue
+```
+
+Copying does bring the Piper voices and the corpus with it, so step 4 has less to
+download.
 
 ## 2. Prerequisites
 
@@ -190,46 +193,56 @@ proof.
 
 ## Copy-paste prompt for an AI agent on the new machine
 
-> I have copied a project folder called `tars` onto this machine. I want to run
-> **only its offline/local edition** — local LLM, local speech recognition, local
-> voice, no cloud keys and no network calls at runtime. The cloud edition is not
-> wanted here.
+> Clone `https://github.com/Akashecho/NGNIX.git` and set it up to run **only its
+> offline/local edition** — local LLM, local speech recognition, local voice, no
+> cloud API keys and no network calls at runtime. The cloud/Azure edition is not
+> wanted on this machine; do not configure it.
 >
-> Read `local/README.md` and `SETUP-LOCAL.md` in the project first; they describe
-> the architecture and the setup steps, including the hardware tiers.
+> Read `SETUP-LOCAL.md` and `local/README.md` first. They describe the
+> architecture, the hardware tiers and the known limitations. Follow
+> `SETUP-LOCAL.md`; the notes below are the parts people get wrong.
 >
-> Please:
-> 1. Delete `ngnix-astra-brain-engine/.env` if it exists — it holds live cloud
->    keys that must not be on this machine. The offline profile is
->    `local/.env.local` and contains no secrets.
-> 2. Check the prerequisites and install whatever is missing: Python 3.11+,
->    Ollama, and espeak-ng. Note that the Windows espeak-ng installer does not add
->    itself to PATH; the project already searches `C:\Program Files\eSpeak NG`, so
->    do not modify PATH for it.
-> 3. Install both requirements files:
->    `ngnix-astra-brain-engine/requirements.txt` and
->    `local/requirements-local.txt`.
-> 4. Tell me this machine's RAM, CPU and whether it has a discrete GPU with how
->    much VRAM, then pick the matching tier (`pi`, `beta` or `gpu`) and run
->    `local/get_models.ps1 -Tier <tier>`. If it is not `beta`, update
->    `OLLAMA_LLM_MODEL` and `WHISPER_MODEL` in `local/.env.local` to match, and on
->    a GPU also set `WHISPER_DEVICE=cuda`, `WHISPER_COMPUTE_TYPE=float16`,
->    `PROMPT_STYLE=full` and `RAG_TOP_K=4`.
-> 5. Run `python local/verify_local.py` and report the result. All 82 checks
->    should pass.
-> 6. Start it with `local/run-local.ps1`, then confirm
->    `curl http://127.0.0.1:8000/health` reports `"offline": true`,
->    `"provider":"ollama"`, `"tts_provider":"local"` and 11 languages in
->    `languages_spoken`. Tell me if any of those are wrong.
+> 1. The clone will not contain `ngnix-astra-brain-engine/.env`, the Piper `.onnx`
+>    voices, `corpus.local.json`, or any model weights. That is intentional. Do
+>    not try to recreate `.env` and do not add cloud credentials anywhere. The
+>    offline profile is `local/.env.local` and it is in the clone.
+> 2. Install prerequisites that are missing: Python 3.11+, Ollama
+>    (`winget install Ollama.Ollama`), and espeak-ng
+>    (`winget install eSpeak-NG.eSpeak-NG`, or `sudo apt install -y espeak-ng`).
+>    The Windows espeak-ng installer does not add itself to PATH — that is
+>    expected and already handled in `brain/tts_local.py`, so do not edit PATH.
+> 3. Install both requirement files:
+>    `pip install -r ngnix-astra-brain-engine/requirements.txt` then
+>    `pip install -r local/requirements-local.txt`.
+> 4. Report this machine's CPU, RAM and whether it has a discrete GPU with how
+>    much VRAM. Then pick the tier from the table in `SETUP-LOCAL.md` (`pi`,
+>    `beta` or `gpu`) and run `./local/get_models.ps1 -Tier <tier>`. This needs
+>    the internet once. If the tier is not `beta`, update `OLLAMA_LLM_MODEL` and
+>    `WHISPER_MODEL` in `local/.env.local` to match. On a GPU also set
+>    `WHISPER_DEVICE=cuda`, `WHISPER_COMPUTE_TYPE=float16`, `PROMPT_STYLE=full`
+>    and `RAG_TOP_K=4`.
+> 5. Run `python local/verify_local.py`. All 103 checks must pass. If any fail,
+>    show me the failures rather than working around them.
+> 6. Start it with `./local/run-local.ps1`. It will build the RAG corpus on first
+>    run, which takes a minute. Then confirm `curl http://127.0.0.1:8000/health`
+>    reports `"offline": true`, `"provider": "ollama"`, `"tts_provider": "local"`,
+>    11 entries in `languages_spoken`, and `indic_nlp.available: true`. Tell me if
+>    any of those are wrong.
 > 7. Run `python local/verify_local_speech.py` to prove the speech round trip
->    works, and `python local/bench_speech.py` plus `python local/bench_local.py`
->    to measure this machine. Report the numbers so I can compare them with the
->    reference laptop (~60 prompt tokens/sec, 13–21 generated tokens/sec,
->    Whisper `small` at about 1x realtime).
+>    (local Piper out, local Whisper back in). Then run
+>    `python local/bench_speech.py` and `python local/bench_local.py` and report
+>    the numbers, so I can compare against the reference laptop: about 60 prompt
+>    tokens/sec, 13–21 generated tokens/sec, Whisper `small` at roughly 1x
+>    realtime, Piper 16–24x realtime.
 >
-> Do not add cloud credentials, do not switch the provider to Azure, and do not
-> deploy anything. If a turn takes longer than about 30 seconds, tell me and
-> recommend a smaller tier rather than silently changing models.
+> Constraints: do not add cloud credentials, do not switch `LLM_PROVIDER` to
+> azure, do not deploy anything, and do not commit model weights (they are
+> CC BY-NC-SA and deliberately gitignored). If a turn takes longer than about 30
+> seconds, tell me and recommend a smaller tier rather than silently swapping
+> models.
 >
-> Known limitation to expect, not a bug: Odia can be spoken but not transcribed,
-> because Whisper has no Odia model.
+> Expected behaviour, not bugs: Odia can be spoken but not transcribed, because
+> Whisper has no Odia model. Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada,
+> Punjabi and Odia are spoken by espeak-ng and sound robotic; only English, Hindi
+> and Malayalam have neural Piper voices. The first turn after startup is slow
+> because Whisper loads, Piper loads and the prompt cache is cold.
